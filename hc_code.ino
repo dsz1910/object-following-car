@@ -36,7 +36,7 @@ void loop() {
       distance = getDistance(leftTrig, leftEcho);
     }
     
-    if (distance >= 0) {
+    if (distance > 0) {
       Serial.println(distance);
     }
     else {

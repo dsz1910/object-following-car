@@ -17,13 +17,13 @@ while True:
         break
     
     frame, ball_pos = camera.detect_ball()
-    cv2.rectangle(frame,
+    '''cv2.rectangle(frame,
                 (camera.width // 2 - camera.tolerance, camera.height // 2 + camera.tolerance),
-                (camera.width // 2 + camera.tolerance, camera.height // 2 - camera.tolerance), (0, 0, 0), 5)
+                (camera.width // 2 + camera.tolerance, camera.height // 2 - camera.tolerance), (0, 0, 0), 5)'''
     
     if not isinstance(ball_pos, list):
         car.move('stop')
-        cv2.imshow('frame', frame)
+        #cv2.imshow('frame', frame)
         continue
     
     direction = camera.decide_where_to_go(ball_pos)
@@ -38,12 +38,12 @@ while True:
             car.avoid_obstacle(obstacle_dir, ser, distance, camera)
             direction = 'stop'
             
-    print(f'Direction: {direction}')
+#print(f'Direction: {direction}')
     car.move(direction)
     
     
-    cv2.circle(frame, (ball_pos[0], ball_pos[1]), ball_pos[2], (255, 255, 255), 5)
-    cv2.imshow('frame', frame)
+    #cv2.circle(frame, (ball_pos[0], ball_pos[1]), ball_pos[2], (255, 255, 255), 5)
+    #cv2.imshow('frame', frame)
 
 
 car.end_driving()

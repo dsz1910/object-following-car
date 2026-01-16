@@ -1,25 +1,19 @@
 import numpy as np
 import cv2
-from picamera import PiCamera
-from picamera.array import PiRGBArray
-from time import sleep
+from picamera2 import Picamera2
 
 
 class Camera:
     
     def __init__(self, tolerance=50):
-        self.capture = PiCamera()
-        self.capture.resolution = (640, 480)
-        self.capture.framerate = 60
-        self.raw_capture = PiRGBArray(self.capture, size=(640, 480))
-        self.width, self.height = self.capture.resolution
+        self.capture = Picamera2()
+        self.video_config = self.capture.create_video_configuration(main={"size" : (640, 640), "format" : "BGR888"})
+        self.capture.start()
         self.tolerance = tolerance
-        sleep(0.1)
+        self.width, self.height = self.capture.stream_configuration('main')['size']
         
     def _get_frame(self):
-        self.raw_capture.truncate(0)
-        self.capture.capture(self.raw_capture, format='bgr')
-        frame = self.raw_capture.array
+        frame = self.capture.capture_array()
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         frame = cv2.GaussianBlur(frame, (15, 15), 0)
         return frame
@@ -53,20 +47,27 @@ class Camera:
         if self.height // 2 - self.tolerance > ball_pos[1]:
             return 'forward'
         return 'stop'
-    
+		
     @staticmethod
     def close_windows():
         cv2.destroyAllWindows()
         
+        
 if __name__ == '__main__':
-    cam = Camera()
+    camera = Camera()
     
     while True:
         if cv2.waitKey(1) == 27:
             break
             
-        frame = cam._get_frame()
-        cv2.imshow('frame', frame)
+        frame, ball_pos = camera.detect_ball()
+        cv2.rectangle(frame,
+                (camera.width // 2 - camera.tolerance, camera.height // 2 + camera.tolerance),
+                (camera.width // 2 + camera.tolerance, camera.height // 2 - camera.tolerance), (0, 0, 0), 5)
+                
+        if not isinstance(ball_pos, list):
+            cv2.imshow('frame', frame)
+            continue
             
-        
-
+        cv2.circle(frame, (ball_pos[0], ball_pos[1]), ball_pos[2], (255, 255, 255), 5)
+        cv2.imshow('frame', frame)

@@ -16,7 +16,7 @@ class Car:
         self.in3 = 18
         self.in4 = 23
         self.enb = 24
-        self.obstacle_avoiding_velocity = 45.5
+        self.obstacle_avoiding_velocity = 15
         
         gpio.setup(self.in1, OUT)
         gpio.setup(self.in2, OUT)
@@ -38,23 +38,23 @@ class Car:
     
     def _move_backwards(self):
         self._stop_motors()
-        self.change_speed(70)
+        self.change_speed(45)
         gpio.output(self.in1, HIGH)
         gpio.output(self.in3, HIGH)
         
     def _move_right(self):
         self._stop_motors()
-        self.change_speed(40)
+        self.change_speed(35)
         gpio.output(self.in3, HIGH)
         
     def _move_left(self):
         self._stop_motors()
-        self.change_speed(40)
+        self.change_speed(35)
         gpio.output(self.in1, HIGH)
         
     def _move_forward(self):
         self._stop_motors()
-        self.change_speed(70)
+        self.change_speed(45)
         gpio.output(self.in2, HIGH)
         gpio.output(self.in4, HIGH)
 
@@ -73,14 +73,14 @@ class Car:
         self.pwm_b.stop()
     
     def calculate_time(self, dist):
-        return (dist / self.obstacle_avoiding_velocity ) + 0.5
+        return (dist / self.obstacle_avoiding_velocity ) + 0.8
 		
     @staticmethod
     def get_distance(ser, sensor):
         dist = []
         ser.reset_input_buffer()
         
-        for _ in range(4):
+        for _ in range(6):
             ser.write(sensor.encode())
             ser.flush()
                 
@@ -102,6 +102,7 @@ class Car:
         while True:
             dist = self.get_distance(ser, 'C')
             if isinstance(dist, float) and dist > 25:
+                sleep(0.6)
                 break
         
         self.move('stop')
@@ -126,9 +127,9 @@ if __name__ == '__main__':
     try:
         car = Car(speed=100, freq=1000)
         ser = serial.Serial('/dev/serial0', baudrate=9600)
-        sleep(5)
+        sleep(2)
         for _ in range(5):
-                dist = car.get_distance(ser, 'L')
+                dist = car.get_distance(ser, 'C')
                 print(dist)
         
     except:
